@@ -16,16 +16,38 @@
 
 #define LOG_LEVEL LOG_LEVEL_INFO
 #define LOG_MODULE_NAME spinel_ipc_backend
-LOG_MODULE_REGISTER(LOG_MODULE_NAME);
+LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL_DBG);
 
-#define IPC_BOUND_TIMEOUT_IN_MS K_MSEC(1000)
+#define IPC_BOUND_TIMEOUT_IN_MS K_MSEC(2000)
 
 static K_SEM_DEFINE(edp_bound_sem, 0, 1);
 static struct ipc_ept ept;
 
+static K_MUTEX_DEFINE(comp_mtx);
+static K_CONDVAR_DEFINE(comp_var);
+static bool complete;
+
+static void wait_for_complete(void)
+{
+	k_mutex_lock(&comp_mtx, K_FOREVER);
+	if (!complete) {
+		k_condvar_wait(&comp_var, &comp_mtx, K_FOREVER);
+	}
+	k_mutex_unlock(&comp_mtx);
+}
+
+static void signal_complete(void)
+{
+	k_mutex_lock(&comp_mtx, K_FOREVER);
+	complete = true;
+	k_condvar_broadcast(&comp_var);
+	k_mutex_unlock(&comp_mtx);
+}
+
 static void endpoint_bound(void *priv)
 {
-	k_sem_give(&edp_bound_sem);
+	// k_sem_give(&edp_bound_sem);
+	signal_complete();
 }
 
 static void endpoint_received(const void *data, size_t len, void *priv)
@@ -60,11 +82,11 @@ nrf_802154_ser_err_t nrf_802154_backend_init(void)
 		return NRF_802154_SERIALIZATION_ERROR_INIT_FAILED;
 	}
 
-	err = k_sem_take(&edp_bound_sem, IPC_BOUND_TIMEOUT_IN_MS);
-	if (err < 0) {
-		LOG_ERR("IPC endpoint bind timed out");
-		return NRF_802154_SERIALIZATION_ERROR_INIT_FAILED;
-	}
+	// err = k_sem_take(&edp_bound_sem, IPC_BOUND_TIMEOUT_IN_MS);
+	// if (err < 0) {
+	// 	LOG_ERR("IPC endpoint bind timed out");
+	// 	return NRF_802154_SERIALIZATION_ERROR_INIT_FAILED;
+	// }
 
 	return NRF_802154_SERIALIZATION_ERROR_OK;
 }
@@ -119,6 +141,7 @@ static void spinel_packet_send_thread_fn(void *arg1, void *arg2, void *arg3)
 		uint32_t expected_ret = buf->len;
 
 		LOG_DBG("Sending %u bytes from send thread", buf->len);
+		wait_for_complete();
 		int ret = ipc_service_send(&ept, buf->data, buf->len);
 
 		rd_idx = get_rb_idx_plus_1(rd_idx);
@@ -144,6 +167,7 @@ nrf_802154_ser_err_t nrf_802154_spinel_encoded_packet_send(const void *p_data,
 	}
 
 	LOG_DBG("Sending %u bytes directly", data_len);
+	wait_for_complete();
 	int ret = ipc_service_send(&ept, p_data, data_len);
 
 	return ((ret < 0) ? NRF_802154_SERIALIZATION_ERROR_BACKEND_FAILURE

@@ -379,11 +379,12 @@ i2s0: i2s@28000 {
 };
 
 ipc0: ipc0 {
-	compatible = "zephyr,ipc-openamp-static-vrings";
-	memory-region = <&sram0_shared>;
+	compatible = "zephyr,ipc-icmsg";
+	rx-region = <&sram0_shared>;
+	tx-region = <&sram1_shared>;
 	mboxes = <&mbox 0>, <&mbox 1>;
 	mbox-names = "tx", "rx";
-	role = "host";
+	// role = "host";
 	status = "okay";
 };
 
