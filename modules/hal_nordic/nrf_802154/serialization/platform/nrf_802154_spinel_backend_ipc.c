@@ -47,6 +47,7 @@ static void signal_complete(void)
 static void endpoint_bound(void *priv)
 {
 	// k_sem_give(&edp_bound_sem);
+	LOG_DBG("Spinel endpoint bound");
 	signal_complete();
 }
 
@@ -69,6 +70,8 @@ nrf_802154_ser_err_t nrf_802154_backend_init(void)
 {
 	const struct device *ipc_instance = DEVICE_DT_GET(DT_NODELABEL(ipc0));
 	int err;
+
+	LOG_DBG("Initializing serialization backend");
 
 	err = ipc_service_open_instance(ipc_instance);
 	if (err < 0 && err != -EALREADY) {
@@ -169,6 +172,10 @@ nrf_802154_ser_err_t nrf_802154_spinel_encoded_packet_send(const void *p_data,
 	LOG_DBG("Sending %u bytes directly", data_len);
 	wait_for_complete();
 	int ret = ipc_service_send(&ept, p_data, data_len);
+
+	if (ret < 0) {
+		LOG_ERR("IPC send failed with error %d", ret);
+	}
 
 	return ((ret < 0) ? NRF_802154_SERIALIZATION_ERROR_BACKEND_FAILURE
 			  : (nrf_802154_ser_err_t) ret);
