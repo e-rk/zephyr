@@ -128,6 +128,19 @@
 				prescaler = <0>;
 			};
 
+			usbhs: usbhs@5a000 {
+				compatible = "nordic,nrf-usbhs", "snps,dwc2";
+				reg = <0x5a000 0x1000>, <0x50020000 0x40000>;
+				reg-names = "wrapper", "core";
+				interrupts = <134 NRF_DEFAULT_IRQ_PRIORITY>;
+				num-in-eps = <8>;
+				num-out-eps = <10>;
+				ghwcfg1 = <0xaa555000>;
+				ghwcfg2 = <0x22abfc72>;
+				ghwcfg4 = <0x1e10aa60>;
+				status = "disabled";
+			};
+
 			dppic10: dppic@82000 {
 				compatible = "nordic,nrf-dppic";
 				reg = <0x82000 0x808>;
