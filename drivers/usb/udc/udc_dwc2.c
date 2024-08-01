@@ -21,7 +21,7 @@
 #include <usb_dwc2_hw.h>
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(udc_dwc2, CONFIG_UDC_DRIVER_LOG_LEVEL);
+LOG_MODULE_REGISTER(udc_dwc2, LOG_LEVEL_DBG);
 #include "udc_dwc2_vendor_quirks.h"
 
 enum dwc2_drv_event_type {
@@ -2740,6 +2740,9 @@ static int dwc2_driver_preinit(const struct device *dev)
 			break;
 		}
 	}
+
+	// volatile uint32_t* adddf = (void*) 0x50020000;
+	// LOG_ERR("Address: %u", *adddf);
 
 	config->make_thread(dev);
 
