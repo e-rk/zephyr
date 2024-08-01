@@ -175,6 +175,10 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 	// 	LOG_ERR("Failed to enable NRFS VBUS service: %d", nrfs_err);
 	// 	return -EIO;
 	// }
+	udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
+	// NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
+	// wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
+	// wrapper->TASKS_START = 1UL;
 
 	return 0;
 }
@@ -204,8 +208,8 @@ static inline int usbhs_disable_core(const struct device *dev)
 	/* Disable interrupts */
 	wrapper->INTENCLR = 1UL;
 
-	wrapper->ENABLE = 0UL;
-	wrapper->TASKS_START = 1UL;
+	// wrapper->ENABLE = 0UL;
+	// wrapper->TASKS_START = 1UL;
 
 	return 0;
 }
