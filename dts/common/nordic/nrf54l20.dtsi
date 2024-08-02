@@ -135,11 +135,11 @@
 				reg = <0x5a000 0x1000>, <0x50020000 0x1a000>;
 				reg-names = "wrapper", "core";
 				interrupts = <90 NRF_DEFAULT_IRQ_PRIORITY>;
-				num-in-eps = <8>;
+				num-in-eps = <16>;
 				num-out-eps = <10>;
 				ghwcfg1 = <0xaa555000>;
-				ghwcfg2 = <0x22abfc72>;
-				ghwcfg4 = <0x1e10aa60>;
+				ghwcfg2 = <0x22affc52>;
+				ghwcfg4 = <0x3e10aa60>;
 				status = "disabled";
 			};
 
