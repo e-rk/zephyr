@@ -208,8 +208,8 @@ static inline int usbhs_disable_core(const struct device *dev)
 	/* Disable interrupts */
 	wrapper->INTENCLR = 1UL;
 
-	// wrapper->ENABLE = 0UL;
-	// wrapper->TASKS_START = 1UL;
+	wrapper->ENABLE = 0UL;
+	wrapper->TASKS_START = 1UL;
 
 	return 0;
 }

@@ -2447,9 +2447,9 @@ static int udc_dwc2_init_controller(const struct device *dev)
 		hs_phy = false;
 	}
 
-	if (usb_dwc2_get_ghwcfg4_phydatawidth(ghwcfg4)) {
-		gusbcfg |= USB_DWC2_GUSBCFG_PHYIF_16_BIT;
-	}
+	// if (usb_dwc2_get_ghwcfg4_phydatawidth(ghwcfg4)) {
+	// 	gusbcfg |= USB_DWC2_GUSBCFG_PHYIF_16_BIT;
+	// }
 
 	/* Update PHY configuration */
 	sys_write32(gusbcfg, gusbcfg_reg);

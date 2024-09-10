@@ -134,8 +134,8 @@
 				reg-names = "wrapper", "core";
 				interrupts = <90 NRF_DEFAULT_IRQ_PRIORITY>;
 				num-in-eps = <16>;
-				num-out-eps = <10>;
-				ghwcfg1 = <0xaa555000>;
+				num-out-eps = <16>;
+				ghwcfg1 = <0x0>;
 				ghwcfg2 = <0x22affc52>;
 				ghwcfg4 = <0x3e10aa60>;
 				status = "disabled";
