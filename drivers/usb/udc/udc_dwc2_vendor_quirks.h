@@ -124,7 +124,7 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
  * until a valid VBUS signal is detected or until the
  * CONFIG_UDC_DWC2_USBHS_VBUS_READY_TIMEOUT timeout expires.
  */
-// static K_EVENT_DEFINE(usbhs_events);
+static K_EVENT_DEFINE(usbhs_events);
 #define USBHS_VBUS_READY	BIT(0)
 
 // static void usbhs_vbus_handler(nrfs_usb_evt_t const *p_evt, void *const context)
@@ -153,7 +153,7 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 // 		break;
 // 	}
 // }
-
+const struct device *kkkkkdev = NULL;
 static inline int usbhs_enable_nrfs_service(const struct device *dev)
 {
 	// nrfs_err_t nrfs_err;
@@ -176,12 +176,21 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 	// 	LOG_ERR("Failed to enable NRFS VBUS service: %d", nrfs_err);
 	// 	return -EIO;
 	// }
-	udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
+	// k_event_post(&usbhs_events, USBHS_VBUS_READY);
+	// udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
 	// NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
 	// wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	// wrapper->TASKS_START = 1UL;
 
+	kkkkkdev = dev;
+
 	return 0;
+}
+
+void bypass_usbhs_vbus(void)
+{
+	k_event_post(&usbhs_events, USBHS_VBUS_READY);
+	udc_submit_event(kkkkkdev, UDC_EVT_VBUS_READY, 0);
 }
 
 static inline int usbhs_enable_core(const struct device *dev)
@@ -195,12 +204,12 @@ static inline int usbhs_enable_core(const struct device *dev)
 	}
 	#endif
 
-	// if (!k_event_wait(&usbhs_events, USBHS_VBUS_READY, false, K_NO_WAIT)) {
-	// 	LOG_WRN("VBUS is not ready, block udc_enable()");
-	// 	if (!k_event_wait(&usbhs_events, USBHS_VBUS_READY, false, timeout)) {
-	// 		return -ETIMEDOUT;
-	// 	}
-	// }
+	if (!k_event_wait(&usbhs_events, USBHS_VBUS_READY, false, K_NO_WAIT)) {
+		LOG_WRN("VBUS is not ready, block udc_enable()");
+		if (!k_event_wait(&usbhs_events, USBHS_VBUS_READY, false, timeout)) {
+			return -ETIMEDOUT;
+		}
+	}
 
 	wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	wrapper->TASKS_START = 1UL;
@@ -260,7 +269,7 @@ static inline int usbhs_init_caps(const struct device *dev)
 
 static inline int usbhs_is_phy_clk_off(const struct device *dev)
 {
-	return false; // !k_event_test(&usbhs_events, USBHS_VBUS_READY);
+	return !k_event_test(&usbhs_events, USBHS_VBUS_READY);
 }
 
 static inline int usbhs_post_hibernation_entry(const struct device *dev)

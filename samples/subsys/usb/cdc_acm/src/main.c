@@ -193,6 +193,8 @@ int main(void)
 
 	LOG_INF("Wait for DTR");
 
+	bypass_usbhs_vbus();
+
 #if defined(CONFIG_USB_DEVICE_STACK_NEXT)
 	k_sem_take(&dtr_sem, K_FOREVER);
 #else
