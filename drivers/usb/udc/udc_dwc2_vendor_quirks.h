@@ -180,7 +180,13 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 	// NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
 	// wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	// wrapper->TASKS_START = 1UL;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x0)) = 1;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
 
+	k_sleep(K_SECONDS(1));
 	kkkkkdev = dev;
 
 	return 0;
