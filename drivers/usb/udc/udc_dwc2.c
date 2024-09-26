@@ -2419,8 +2419,10 @@ static int udc_dwc2_init_controller(const struct device *dev)
 	dcfg &= ~USB_DWC2_DCFG_DEVSPD_MASK;
 	switch (usb_dwc2_get_ghwcfg2_hsphytype(ghwcfg2)) {
 	case USB_DWC2_GHWCFG2_HSPHYTYPE_UTMIPLUSULPI:
+		LOG_ERR("HSPHYTYPE_UTMIPLUSULPI");
 		__fallthrough;
 	case USB_DWC2_GHWCFG2_HSPHYTYPE_ULPI:
+		LOG_ERR("HSPHYTYPE_ULPI");
 		gusbcfg |= USB_DWC2_GUSBCFG_PHYSEL_USB20 |
 			   USB_DWC2_GUSBCFG_ULPI_UTMI_SEL_ULPI;
 		dcfg |= USB_DWC2_DCFG_DEVSPD_USBHS20
@@ -2428,6 +2430,7 @@ static int udc_dwc2_init_controller(const struct device *dev)
 		hs_phy = true;
 		break;
 	case USB_DWC2_GHWCFG2_HSPHYTYPE_UTMIPLUS:
+		LOG_ERR("USB_DWC2_GHWCFG2_HSPHYTYPE_UTMIPLUS");
 		gusbcfg |= USB_DWC2_GUSBCFG_PHYSEL_USB20 |
 			   USB_DWC2_GUSBCFG_ULPI_UTMI_SEL_UTMI;
 		dcfg |= USB_DWC2_DCFG_DEVSPD_USBHS20
@@ -2437,6 +2440,7 @@ static int udc_dwc2_init_controller(const struct device *dev)
 	case USB_DWC2_GHWCFG2_HSPHYTYPE_NO_HS:
 		__fallthrough;
 	default:
+		LOG_ERR("USB_DWC2_GHWCFG2_HSPHYTYPE_NO_HS");
 		if (usb_dwc2_get_ghwcfg2_fsphytype(ghwcfg2) !=
 		    USB_DWC2_GHWCFG2_FSPHYTYPE_NO_FS) {
 			gusbcfg |= USB_DWC2_GUSBCFG_PHYSEL_USB11;
@@ -2447,9 +2451,18 @@ static int udc_dwc2_init_controller(const struct device *dev)
 		hs_phy = false;
 	}
 
+	// gusbcfg |= USB_DWC2_GUSBCFG_PHYSEL_USB20 |
+	// 	USB_DWC2_GUSBCFG_ULPI_UTMI_SEL_ULPI;
+
 	// if (usb_dwc2_get_ghwcfg4_phydatawidth(ghwcfg4)) {
+	// 	LOG_ERR("16-bit mode");
 	// 	gusbcfg |= USB_DWC2_GUSBCFG_PHYIF_16_BIT;
 	// }
+
+	// gusbcfg |= 0x80000000;
+	// gusbcfg |= 0x8000;
+	// gusbcfg |= 0x2400;
+	LOG_ERR("gusbcfg: %x", gusbcfg);
 
 	/* Update PHY configuration */
 	sys_write32(gusbcfg, gusbcfg_reg);
