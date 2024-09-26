@@ -378,9 +378,11 @@ int main(void)
 	uint32_t dtr = 0;
 
 	dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_shell_uart));
-	if (!device_is_ready(dev) || usb_enable(NULL)) {
+	if (!device_is_ready(dev) || enable_usb_device_next(NULL)) {
 		return 0;
 	}
+// #error test
+	bypass_usbhs_vbus();
 
 	while (!dtr) {
 		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);

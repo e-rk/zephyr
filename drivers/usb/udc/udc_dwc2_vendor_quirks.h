@@ -180,13 +180,16 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 	// NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
 	// wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	// wrapper->TASKS_START = 1UL;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x0)) = 1;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
-
+	*((uint32_t *)0x50120B34) = 0x00000004; // OSCILLATORS_PLL_DBG_REQUESTMODE_LOCKED_Msk;
 	k_sleep(K_SECONDS(1));
+
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x0)) = 1;
+	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
+	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
+	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
+	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
+
+	// k_sleep(K_SECONDS(1));
 	kkkkkdev = dev;
 
 	return 0;
@@ -194,6 +197,15 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 
 void bypass_usbhs_vbus(void)
 {
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
+	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
+	k_sleep(K_SECONDS(1));
+
+	*((volatile uint32_t *)0x5010E024) = 1; // request the 24MHz clock
+	// while (*((volatile uint32_t *)0x5010E124) == 0); // Wait for the 24MHz clock
+
 	k_event_post(&usbhs_events, USBHS_VBUS_READY);
 	udc_submit_event(kkkkkdev, UDC_EVT_VBUS_READY, 0);
 }
@@ -207,6 +219,7 @@ static inline int usbhs_enable_core(const struct device *dev)
 		k_event_wait(&usbhs_events, USBHS_VBUS_READY, false, K_FOREVER);
 	}
 
+	LOG_ERR("Enabling core and phy");
 	wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	wrapper->TASKS_START = 1UL;
 
