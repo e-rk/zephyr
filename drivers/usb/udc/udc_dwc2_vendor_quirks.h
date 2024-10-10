@@ -112,8 +112,10 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 
 #define DT_DRV_COMPAT snps_dwc2
 
-// #include <nrfs_backend_ipc_service.h>
-// #include <nrfs_usb.h>
+#if IS_ENABLED(CONFIG_NRFS_VBUS_DETECTOR_SERVICE_ENABLED)
+#include <nrfs_backend_ipc_service.h>
+#include <nrfs_usb.h>
+#endif
 
 #define USBHS_DT_WRAPPER_REG_ADDR(n) UINT_TO_POINTER(DT_INST_REG_ADDR_BY_NAME(n, wrapper))
 
@@ -126,32 +128,35 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 static K_EVENT_DEFINE(usbhs_events);
 #define USBHS_VBUS_READY	BIT(0)
 
-// static void usbhs_vbus_handler(nrfs_usb_evt_t const *p_evt, void *const context)
-// {
-// 	const struct device *dev = context;
+#if IS_ENABLED(CONFIG_NRFS_VBUS_DETECTOR_SERVICE_ENABLED)
+static void usbhs_vbus_handler(nrfs_usb_evt_t const *p_evt, void *const context)
+{
+	const struct device *dev = context;
 
-// 	switch (p_evt->type) {
-// 	case NRFS_USB_EVT_VBUS_STATUS_CHANGE:
-// 		LOG_DBG("USBHS new status, pll_ok = %d vreg_ok = %d vbus_detected = %d",
-// 			p_evt->usbhspll_ok, p_evt->vregusb_ok, p_evt->vbus_detected);
+	switch (p_evt->type) {
+	case NRFS_USB_EVT_VBUS_STATUS_CHANGE:
+		LOG_DBG("USBHS new status, pll_ok = %d vreg_ok = %d vbus_detected = %d",
+			p_evt->usbhspll_ok, p_evt->vregusb_ok, p_evt->vbus_detected);
 
-// 		if (p_evt->usbhspll_ok && p_evt->vregusb_ok && p_evt->vbus_detected) {
-// 			k_event_post(&usbhs_events, USBHS_VBUS_READY);
-// 			udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
-// 		} else {
-// 			k_event_set_masked(&usbhs_events, 0, USBHS_VBUS_READY);
-// 			udc_submit_event(dev, UDC_EVT_VBUS_REMOVED, 0);
-// 		}
+		if (p_evt->usbhspll_ok && p_evt->vregusb_ok && p_evt->vbus_detected) {
+			k_event_post(&usbhs_events, USBHS_VBUS_READY);
+			udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
+		} else {
+			k_event_set_masked(&usbhs_events, 0, USBHS_VBUS_READY);
+			udc_submit_event(dev, UDC_EVT_VBUS_REMOVED, 0);
+		}
 
-// 		break;
-// 	case NRFS_USB_EVT_REJECT:
-// 		LOG_ERR("Request rejected");
-// 		break;
-// 	default:
-// 		LOG_ERR("Unknown event type 0x%x", p_evt->type);
-// 		break;
-// 	}
-// }
+		break;
+	case NRFS_USB_EVT_REJECT:
+		LOG_ERR("Request rejected");
+		break;
+	default:
+		LOG_ERR("Unknown event type 0x%x", p_evt->type);
+		break;
+	}
+}
+#endif
+
 const struct device *kkkkkdev = NULL;
 static inline int usbhs_enable_nrfs_service(const struct device *dev)
 {
