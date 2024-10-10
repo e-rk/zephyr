@@ -141,7 +141,7 @@
 				ghwcfg2 = <0x22affc52>;
 				ghwcfg4 = <0x3e10aa60>;
 				status = "disabled";
-			}; // p/x *((uint32_t*)(0x50020000 + 0xc))
+			};
 
 			dppic10: dppic@82000 {
 				compatible = "nordic,nrf-dppic";
