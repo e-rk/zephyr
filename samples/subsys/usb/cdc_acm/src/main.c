@@ -20,7 +20,6 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/ring_buffer.h>
-#include <zephyr/sys/reboot.h>
 
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/usb/usbd.h>
@@ -198,11 +197,6 @@ int main(void)
 
 #if defined(CONFIG_USB_DEVICE_STACK_NEXT)
 	k_sem_take(&dtr_sem, K_FOREVER);
-
-	// k_sem_take(&dtr_sem, K_SECONDS(10));
-
-	// LOG_DBG("Shutdown");
-	// sys_reboot(SYS_REBOOT_COLD);
 #else
 	while (true) {
 		uint32_t dtr = 0U;
@@ -243,30 +237,3 @@ int main(void)
 
 	return 0;
 }
-
-
-// [25547.576649] hub 3-0:1.0: state 7 ports 12 chg 0000 evt 0010
-// [25547.576744] usb usb3-port4: status 0100, change 0001, 12 Mb/s
-// [25547.720463] usb usb3-port4: debounce total 100ms stable 100ms status 0x100
-// [25549.615690] hub 3-0:1.0: state 7 ports 12 chg 0000 evt 0010
-// [25549.615780] usb usb3-port4: status 0101, change 0001, 12 Mb/s
-// [25549.756272] usb usb3-port4: debounce total 100ms stable 100ms status 0x101
-// [25549.884287] usb 3-4: new full-speed USB device number 18 using xhci_hcd
-// [25550.012625] usb 3-4: device descriptor read/64, error -71
-// [25550.248375] usb 3-4: device descriptor read/64, error -71
-// [25550.484165] usb 3-4: new full-speed USB device number 19 using xhci_hcd
-// [25550.612249] usb 3-4: device descriptor read/64, error -71
-// [25550.848545] usb 3-4: device descriptor read/64, error -71
-// [25550.956427] usb usb3-port4: attempt power cycle
-// [25551.340410] hub 3-0:1.0: port_wait_reset: err = -11
-// [25551.340422] usb usb3-port4: not enabled, trying reset again...
-// [25551.608168] usb 3-4: new full-speed USB device number 20 using xhci_hcd
-// [25551.608468] usb 3-4: Device not responding to setup address.
-// [25551.816597] usb 3-4: Device not responding to setup address.
-// [25552.024264] usb 3-4: device not accepting address 20, error -71
-// [25552.152389] usb 3-4: new full-speed USB device number 21 using xhci_hcd
-// [25552.152624] usb 3-4: Device not responding to setup address.
-// [25552.360894] usb 3-4: Device not responding to setup address.
-// [25552.568260] usb 3-4: device not accepting address 21, error -71
-// [25552.568629] usb usb3-port4: unable to enumerate USB device
-// [25552.568681] hub 3-0:1.0: state 7 ports 12 chg 0000 evt 0010
