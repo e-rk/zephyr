@@ -108,7 +108,7 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 
 #endif /*DT_HAS_COMPAT_STATUS_OKAY(st_stm32f4_fsotg) */
 
-#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs)
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs_nrfs)
 
 #define DT_DRV_COMPAT snps_dwc2
 
@@ -306,7 +306,7 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_NRF_USBHS_DEFINE)
 
 #undef DT_DRV_COMPAT
 
-#endif /*DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs) */
+#endif /*DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs_nrfs) */
 
 /* Add next vendor quirks definition above this line */
 
