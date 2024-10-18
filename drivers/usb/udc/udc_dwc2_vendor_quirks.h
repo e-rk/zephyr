@@ -112,10 +112,8 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 
 #define DT_DRV_COMPAT snps_dwc2
 
-#if IS_ENABLED(CONFIG_NRFS_VBUS_DETECTOR_SERVICE_ENABLED)
 #include <nrfs_backend_ipc_service.h>
 #include <nrfs_usb.h>
-#endif
 
 #define USBHS_DT_WRAPPER_REG_ADDR(n) UINT_TO_POINTER(DT_INST_REG_ADDR_BY_NAME(n, wrapper))
 
@@ -178,11 +176,6 @@ static inline int usbhs_enable_nrfs_service(const struct device *dev)
 		LOG_ERR("Failed to enable NRFS VBUS service: %d", nrfs_err);
 		return -EIO;
 	}
-	k_event_post(&usbhs_events, USBHS_VBUS_READY);
-	udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
-	NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
-	wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
-	wrapper->TASKS_START = 1UL;
 
 	return 0;
 }
@@ -205,7 +198,6 @@ static inline int usbhs_enable_core(const struct device *dev)
 		}
 	}
 
-	LOG_ERR("Enabling core and phy");
 	wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
 	wrapper->TASKS_START = 1UL;
 
