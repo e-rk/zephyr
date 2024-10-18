@@ -129,7 +129,6 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_STM32F4_FSOTG_DEFINE)
 static K_EVENT_DEFINE(usbhs_events);
 #define USBHS_VBUS_READY	BIT(0)
 
-#if IS_ENABLED(CONFIG_NRFS_VBUS_DETECTOR_SERVICE_ENABLED)
 static void usbhs_vbus_handler(nrfs_usb_evt_t const *p_evt, void *const context)
 {
 	const struct device *dev = context;
@@ -156,64 +155,36 @@ static void usbhs_vbus_handler(nrfs_usb_evt_t const *p_evt, void *const context)
 		break;
 	}
 }
-#endif
 
-const struct device *kkkkkdev = NULL;
 static inline int usbhs_enable_nrfs_service(const struct device *dev)
 {
-	// nrfs_err_t nrfs_err;
-	// int err;
+	nrfs_err_t nrfs_err;
+	int err;
 
-	// err = nrfs_backend_wait_for_connection(K_MSEC(1000));
-	// if (err) {
-	// 	LOG_INF("NRFS backend connection timeout");
-	// 	return err;
-	// }
+	err = nrfs_backend_wait_for_connection(K_MSEC(1000));
+	if (err) {
+		LOG_INF("NRFS backend connection timeout");
+		return err;
+	}
 
-	// nrfs_err = nrfs_usb_init(usbhs_vbus_handler);
-	// if (nrfs_err != NRFS_SUCCESS) {
-	// 	LOG_ERR("Failed to init NRFS VBUS handler: %d", nrfs_err);
-	// 	return -EIO;
-	// }
+	nrfs_err = nrfs_usb_init(usbhs_vbus_handler);
+	if (nrfs_err != NRFS_SUCCESS) {
+		LOG_ERR("Failed to init NRFS VBUS handler: %d", nrfs_err);
+		return -EIO;
+	}
 
-	// nrfs_err = nrfs_usb_enable_request((void *)dev);
-	// if (nrfs_err != NRFS_SUCCESS) {
-	// 	LOG_ERR("Failed to enable NRFS VBUS service: %d", nrfs_err);
-	// 	return -EIO;
-	// }
-	// k_event_post(&usbhs_events, USBHS_VBUS_READY);
-	// udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
-	// NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
-	// wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
-	// wrapper->TASKS_START = 1UL;
-	*((uint32_t *)0x50120B34) = 0x00000004; // OSCILLATORS_PLL_DBG_REQUESTMODE_LOCKED_Msk;
-	k_sleep(K_SECONDS(1));
-
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x0)) = 1;
-	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
-	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
-	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
-	// *((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
-
-	// k_sleep(K_SECONDS(1));
-	kkkkkdev = dev;
+	nrfs_err = nrfs_usb_enable_request((void *)dev);
+	if (nrfs_err != NRFS_SUCCESS) {
+		LOG_ERR("Failed to enable NRFS VBUS service: %d", nrfs_err);
+		return -EIO;
+	}
+	k_event_post(&usbhs_events, USBHS_VBUS_READY);
+	udc_submit_event(dev, UDC_EVT_VBUS_READY, 0);
+	NRF_USBHS_Type *wrapper = USBHS_DT_WRAPPER_REG_ADDR(0);
+	wrapper->ENABLE = USBHS_ENABLE_PHY_Msk | USBHS_ENABLE_CORE_Msk;
+	wrapper->TASKS_START = 1UL;
 
 	return 0;
-}
-
-void bypass_usbhs_vbus(void)
-{
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x500)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x504)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x508)) = 0x80000001;
-	*((uint32_t*)(0x50100000 + 0x1000 * 33 + 0x50c)) = 0x80000001;
-	k_sleep(K_SECONDS(1));
-
-	*((volatile uint32_t *)0x5010E024) = 1; // request the 24MHz clock
-	// while (*((volatile uint32_t *)0x5010E124) == 0); // Wait for the 24MHz clock
-
-	k_event_post(&usbhs_events, USBHS_VBUS_READY);
-	udc_submit_event(kkkkkdev, UDC_EVT_VBUS_READY, 0);
 }
 
 static inline int usbhs_enable_core(const struct device *dev)
@@ -259,15 +230,15 @@ static inline int usbhs_disable_core(const struct device *dev)
 
 static inline int usbhs_disable_nrfs_service(const struct device *dev)
 {
-	// nrfs_err_t nrfs_err;
+	nrfs_err_t nrfs_err;
 
-	// nrfs_err = nrfs_usb_disable_request((void *)dev);
-	// if (nrfs_err != NRFS_SUCCESS) {
-	// 	LOG_ERR("Failed to disable NRFS VBUS service: %d", nrfs_err);
-	// 	return -EIO;
-	// }
+	nrfs_err = nrfs_usb_disable_request((void *)dev);
+	if (nrfs_err != NRFS_SUCCESS) {
+		LOG_ERR("Failed to disable NRFS VBUS service: %d", nrfs_err);
+		return -EIO;
+	}
 
-	// nrfs_usb_uninit();
+	nrfs_usb_uninit();
 
 	return 0;
 }
@@ -345,7 +316,7 @@ DT_INST_FOREACH_STATUS_OKAY(QUIRK_NRF_USBHS_DEFINE)
 
 #endif /*DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs_nrfs) */
 
-#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs)
+#if DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs_usbreg)
 
 #define DT_DRV_COMPAT snps_dwc2
 
@@ -474,7 +445,7 @@ static inline int usbhs_is_phy_clk_off(const struct device *dev)
 
 DT_INST_FOREACH_STATUS_OKAY(QUIRK_NRF_USBHS_DEFINE)
 
-#endif /*DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs) */
+#endif /*DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_usbhs_usbreg) */
 
 /* Add next vendor quirks definition above this line */
 
