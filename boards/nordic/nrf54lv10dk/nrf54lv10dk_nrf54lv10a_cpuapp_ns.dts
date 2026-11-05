@@ -32,9 +32,5 @@
 	status = "disabled";
 };
 
-&bt_hci_controller {
-	status = "disabled";
-};
-
 /* Include default memory partition configuration file */
 #include <vendor/nordic/nrf54lv10a_cpuapp_ns_partition.dtsi>
